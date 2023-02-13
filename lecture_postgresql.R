@@ -1,12 +1,20 @@
 library(DBI)
 library(dplyr)
+
+# Récupération des variables d'environnement
+env_host     <- Sys.getenv('ENV_PG_HOST')
+env_dbname   <- Sys.getenv('ENV_PG_DBNAME')
+env_port     <- Sys.getenv('ENV_PG_PORT')
+env_user     <- Sys.getenv('ENV_PG_USER')
+env_password <- Sys.getenv('ENV_PG_PASSWD')
+
 # Ouverture de la connexion à la base de données
 con <- dbConnect(  RPostgres::Postgres(),
-                   dbname = "dbiquale",
-                   host = "postgresql-994591",
-                   port = 5432,
-                   user = "postgres",
-                   password = "pfapevsplxmabtf68erd")
+                   dbname = env_dbname,
+                   host = env_host,
+                   port = env_port,
+                   user = env_user,
+                   password = env_password)
 # Listing des tables du schéma public
 dbListTables(con)
 
