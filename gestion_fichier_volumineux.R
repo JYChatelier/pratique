@@ -14,20 +14,21 @@ df <- aws.s3::s3read_using(FUN = utils::unzip,
 df <- read.csv("analyse_2009_2021.csv")
 
 # Lecture du fichier csv nouvellement créé dans un dataframe
-df <- aws.s3::s3read_using(FUN = read.csv,
+system.time(
+  df <- aws.s3::s3read_using(FUN = read.csv,
                            sep=";",
                            header=TRUE,
                            object = "analyse_2009_2021.csv", 
                            bucket = "projet-iquale",
                            opts = list("region" = ""))
-
+)
 system.time(
   df <- aws.s3::s3read_using(FUN = data.table::fread,
-                           sep=";",
-                           header=TRUE,
-                           object = "analyse_2009_2021.csv", 
-                           bucket = "projet-iquale",
-                           opts = list("region" = ""))
+                             sep=";",
+                             header=TRUE,
+                             object = "analyse_2009_2021.csv", 
+                             bucket = "projet-iquale",
+                             opts = list("region" = ""))
 )
 # Copie du fichier csv local à la session sur l'espace de stockage S3
 aws.s3::put_object("analyse_2009_2021.csv", 
@@ -43,9 +44,9 @@ arrow::write_parquet(df,"analyse_2009_2021.csv.parquet")
 # Lecture du fichier au format parquet dans un dataframe
 system.time(
   df2 <- aws.s3::s3read_using(FUN = arrow::read_parquet,
-                            object = "analyse_2009_2021.csv.parquet", 
-                            bucket = "projet-iquale",
-                            opts = list("region" = ""))
+                              object = "analyse_2009_2021.csv.parquet", 
+                              bucket = "projet-iquale",
+                              opts = list("region" = ""))
 )
 
 df2 <- arrow::read_parquet("analyse_2009_2021.csv.parquet")
