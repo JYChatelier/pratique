@@ -16,34 +16,8 @@ df <- aws.s3::s3read_using(FUN = utils::unzip,
 # dans le working directory
 df <- read.csv("analyse_2009_2021.csv")
 
+
 # Lecture du fichier csv nouvellement créé dans un dataframe
-
-
-mbm <- microbenchmark(
-  "util::read.csv" = {aws.s3::s3read_using(FUN = read.csv,
-                             sep=";",
-                             header=TRUE,
-                             object = "analyse_2009_2021.csv", 
-                             bucket = "projet-iquale",
-                             opts = list("region" = ""))},
-  "data.table::fread" = {aws.s3::s3read_using(FUN = data.table::fread,
-                             sep=";",
-                             header=TRUE,
-                             object = "analyse_2009_2021.csv", 
-                             bucket = "projet-iquale",
-                             opts = list("region" = ""))},
-  
-  "arrow::read_parquet" = {aws.s3::s3read_using(FUN = arrow::read_parquet,
-                              object = "analyse_2009_2021.csv.parquet", 
-                              bucket = "projet-iquale",
-                              opts = list("region" = ""))},
-  times = 3
-  
-  
-)
-mbm
-autoplot(mbm)
-
 system.time(
   df <- aws.s3::s3read_using(FUN = read.csv,
                            sep=";",
@@ -89,3 +63,29 @@ aws.s3::put_object("analyse_2009_2021.csv.parquet",
                    show_progress = TRUE,
                    region = "")
 
+
+# Comparaison des performances entre les 3 méthodes de lecture sur plusieurs essais
+mbm <- microbenchmark(
+  "util::read.csv" = {aws.s3::s3read_using(FUN = read.csv,
+                                           sep=";",
+                                           header=TRUE,
+                                           object = "analyse_2009_2021.csv", 
+                                           bucket = "projet-iquale",
+                                           opts = list("region" = ""))},
+  "data.table::fread" = {aws.s3::s3read_using(FUN = data.table::fread,
+                                              sep=";",
+                                              header=TRUE,
+                                              object = "analyse_2009_2021.csv", 
+                                              bucket = "projet-iquale",
+                                              opts = list("region" = ""))},
+  
+  "arrow::read_parquet" = {aws.s3::s3read_using(FUN = arrow::read_parquet,
+                                                object = "analyse_2009_2021.csv.parquet", 
+                                                bucket = "projet-iquale",
+                                                opts = list("region" = ""))},
+  times = 3
+  
+  
+)
+mbm
+autoplot(mbm)
