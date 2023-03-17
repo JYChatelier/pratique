@@ -2,7 +2,7 @@ library(SparkR)
 
 
 #Ouverture de la session Spark déjà configurée
-sparkR.session(master = "k8s://https://kubernetes.default.svc:443")
+sparkR.session(master = "k8s://https://kubernetes.default.svc:443",sparkConfig = list(spark.driver.memory = "16g"))
 
 #Lecture du fichier Sirene au format CSV
 spark_sirene_csv <- read.df("s3a://projet-spark-lab/diffusion/formation/data/sirene/sirene.csv", "csv", header = "true", inferSchema = "true")
@@ -30,14 +30,10 @@ head(naiades_parquet_count_sql)
 
 
 write.df(spark_sirene_parquet,
-         path="s3a://jchatelier/sirene.parquet",
-         #"parquet",
+         path="s3a://jchatelier/sirene.autre",
+         "parquet",
          mode = "overwrite",
          partitionBy = "etatAdministratifEtablissement")
-df <- as.DataFrame(spark_sirene_parquet)
-head(summarize(groupBy(
-  spark_sirene_parquet, spark_sirene_parquet$etatAdministratifEtablissement), 
-               count = n(spark_sirene_parquet$etatAdministratifEtablissement)))
 
 
-spark_sirene_parquet.group_by(activitePrincipaleEtablissement)
+sparkR.session.stop()
