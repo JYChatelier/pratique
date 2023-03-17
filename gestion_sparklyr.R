@@ -2,12 +2,13 @@ library(sparklyr)
 library(dplyr)
 
 
-spark_install(version = "3.3")
+#spark_install(version = "3.3")
+#sc <- spark_connect(master = "local", version = '3.3')
 
-sc <- spark_connect(master = "local", version = '3.3')
+sc <- spark_connect(master = "k8s://https://kubernetes.default.svc:443")
 
-mtcars <- copy_to(sc, mtcars, "mtcars")
-flights <- copy_to(sc, nycflights13::flights, "flights")
+mtcars_spark <- copy_to(sc, mtcars, "mtcars")
+
 
 
 df <- aws.s3::s3read_using(FUN = arrow::read_parquet,
@@ -16,5 +17,3 @@ df <- aws.s3::s3read_using(FUN = arrow::read_parquet,
                             opts = list("region" = ""))
 
 arrow::write_parquet(df,"analyse_2009_2021.csv.parquet")
-
-aws
