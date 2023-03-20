@@ -2,7 +2,8 @@ library(SparkR)
 
 
 #Ouverture de la session Spark déjà configurée
-sparkR.session(master = "k8s://https://kubernetes.default.svc:443",sparkConfig = list(spark.driver.memory = "16g"))
+sparkR.session(master = "k8s://https://kubernetes.default.svc:443",sparkConfig = list(spark.executor.memory = "16g"))
+allConfigs <- sparkR.conf()
 
 #Lecture du fichier Sirene au format CSV
 spark_sirene_csv <- read.df("s3a://projet-spark-lab/diffusion/formation/data/sirene/sirene.csv", "csv", header = "true", inferSchema = "true")
