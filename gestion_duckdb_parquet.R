@@ -1,13 +1,18 @@
 library(DBI)
 library(duckdb)
 library(arrow)
-
-#Requête sur une fichier au format Parquet stocké en local
-dbGetQuery(con, "SELECT count(*) FROM read_parquet('Export stations - 50626866.parquet')")
-
+library(dplyr)
 
 #Ouverture d'une connexion à une base de données de type DuckDB
 con <- dbConnect(duckdb::duckdb())
+
+#Requête sur une fichier au format Parquet stocké en local
+#Penser à faire un setwd("<répertoire du fichier en local>")
+dbGetQuery(con, "SELECT count(*) FROM read_parquet('Export stations - 50626866.parquet')")
+#On peut utiliser la syntaxe dplyr directement sur le fichier
+tbl(con, 'Export stations - 50626866.parquet') |>
+  collect()
+  
 #Installation d'un protocole pour gérer le stockage S3
 dbSendQuery(con,"INSTALL httpfs")
 dbSendQuery(con,"LOAD httpfs")
@@ -22,3 +27,9 @@ dbSendQuery(con,"SET s3_url_style = 'path'") # sinon le path n'est pas bien cons
 res_all1 <- dbGetQuery(con, "SELECT year(DatePrel::DATE),CdStationMesureEauxSurface,CdParametre, count(*) FROM read_parquet('s3://projet-iquale/analyse_2009_2021.csv.parquet') GROUP BY (year(DatePrel::DATE),CdStationMesureEauxSurface,CdParametre)")
 res_all2 <- dbGetQuery(con, "SELECT year(DatePrel::DATE),CdStationMesureEauxSurface,CdParametre, count(*) FROM read_parquet('s3://projet-iquale/naiades/*/*.parquet')           GROUP BY (year(DatePrel::DATE),CdStationMesureEauxSurface,CdParametre)")
 res_201x <- dbGetQuery(con, "SELECT year(DatePrel::DATE),CdStationMesureEauxSurface,CdParametre, count(*) FROM read_parquet('s3://projet-iquale/naiades/year=201*/*.parquet')   GROUP BY (year(DatePrel::DATE),CdStationMesureEauxSurface,CdParametre)")
+
+#Listing des tables pour montrer qu'il n'y a pas eu formellement d'intégration de données dans des tables
+dbListTables(con)
+
+#Fermeture de la connexion à la base de données
+dbDisconnect(con)
